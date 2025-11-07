@@ -1,0 +1,5 @@
+{
+  "name": "AI Photo Restorer 2025",
+  "description": "An application to restore old black and white photos to look as if they were taken with a modern digital camera in 2025. It uses AI to deskew, colorize, and add realistic details.",
+  "requestFramePermissions": []
+}
