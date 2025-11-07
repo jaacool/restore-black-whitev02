@@ -5,6 +5,7 @@ import Header from './components/Header';
 import ImageUploader from './components/ImageUploader';
 import ImageComparator from './components/ImageComparator';
 import Loader from './components/Loader';
+import CameraView from './components/CameraView';
 import { DownloadIcon } from './components/icons/DownloadIcon';
 import { RetryIcon } from './components/icons/RetryIcon';
 
@@ -15,6 +16,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [originalMimeType, setOriginalMimeType] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
 
   const runRestoration = useCallback(async () => {
     if (!originalImage) return;
@@ -89,6 +91,11 @@ export default function App() {
     }
   }, [isLoading, originalImage, handleImageUpload]);
 
+  const handleCapture = (file: File) => {
+    setIsCameraOpen(false);
+    handleImageUpload(file);
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center antialiased">
@@ -100,7 +107,16 @@ export default function App() {
         onDragLeave={handleDrag}
         onDrop={handleDrop}
       >
-        {!originalImage && <ImageUploader onImageUpload={handleImageUpload} isLoading={isLoading} isDragging={isDragging} />}
+        {!originalImage && !isCameraOpen && (
+          <ImageUploader 
+            onImageUpload={handleImageUpload} 
+            onTakePhoto={() => setIsCameraOpen(true)}
+            isLoading={isLoading} 
+            isDragging={isDragging} 
+          />
+        )}
+
+        {isCameraOpen && <CameraView onCapture={handleCapture} onClose={() => setIsCameraOpen(false)} />}
         
         {originalImage && (
           <div className="w-full max-w-6xl flex flex-col items-center">
