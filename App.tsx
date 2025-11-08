@@ -399,7 +399,7 @@ export default function App() {
       
       {/* User Menu & Credit Display - Fixed Top Right */}
       {isApiConfigured && !isLoadingAuth && (
-        <div className="fixed top-4 right-4 z-40 flex items-center gap-3">
+        <div className="fixed top-4 right-4 z-40 flex flex-col items-end gap-2">
           {user ? (
             <>
               <CreditDisplay credits={credits} onClick={() => setIsCreditShopOpen(true)} />
