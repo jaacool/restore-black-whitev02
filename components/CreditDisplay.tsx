@@ -1,6 +1,7 @@
 import React from 'react';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { CREDITS_PER_IMAGE } from '../types/credits';
+import { ADMIN_CREDITS } from '../config/admin';
 
 interface CreditDisplayProps {
   credits: number;
@@ -8,6 +9,7 @@ interface CreditDisplayProps {
 }
 
 const CreditDisplay: React.FC<CreditDisplayProps> = ({ credits, onClick }) => {
+  const isUnlimited = credits >= ADMIN_CREDITS;
   const imagesRemaining = Math.floor(credits / CREDITS_PER_IMAGE);
   
   return (
@@ -18,8 +20,17 @@ const CreditDisplay: React.FC<CreditDisplayProps> = ({ credits, onClick }) => {
     >
       <SparklesIcon className="h-6 w-6" />
       <div className="flex flex-col items-start">
-        <span className="text-lg leading-tight">{credits} Credits</span>
-        <span className="text-sm opacity-80 leading-tight">({imagesRemaining} {imagesRemaining === 1 ? 'Bild' : 'Bilder'})</span>
+        {isUnlimited ? (
+          <>
+            <span className="text-lg leading-tight">∞ Unbegrenzt</span>
+            <span className="text-sm opacity-80 leading-tight">(Admin)</span>
+          </>
+        ) : (
+          <>
+            <span className="text-lg leading-tight">{credits} Credits</span>
+            <span className="text-sm opacity-80 leading-tight">({imagesRemaining} {imagesRemaining === 1 ? 'Bild' : 'Bilder'})</span>
+          </>
+        )}
       </div>
     </button>
   );
