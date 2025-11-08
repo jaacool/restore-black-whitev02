@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { restorePhoto } from './services/geminiService';
 import { preprocessImage, splitImage, stitchAndBlendImages } from './utils/imageUtils';
+import { getCredits, deductCredits, addCredits, hasEnoughCredits } from './services/creditService';
+import { CREDITS_PER_IMAGE, CREDITS_PER_SUPER_RESOLUTION, CreditPackage } from './types/credits';
 import Header from './components/Header';
 import ImageUploader from './components/ImageUploader';
 import ImageGrid from './components/ImageGrid';
@@ -11,6 +13,9 @@ import { PhotoIcon } from './components/icons/PhotoIcon';
 import ImageZoomView from './components/ImageZoomView';
 import ApiKeyMessage from './components/ApiKeyMessage';
 import GettingStarted from './components/GettingStarted';
+import CreditDisplay from './components/CreditDisplay';
+import CreditShop from './components/CreditShop';
+import InsufficientCreditsModal from './components/InsufficientCreditsModal';
 
 const ENHANCE_PROMPT = `You are an expert photo restoration AI. Your task is to transform this old, potentially damaged, black-and-white photograph into a vibrant, modern image that looks as if it were captured in 2025 with a professional-grade medium format camera (e.g., a Hasselblad) and scanned at an ultra-high 12K resolution.
 
@@ -119,10 +124,23 @@ export default function App() {
   const [mode, setMode] = useState<ProcessMode>('enhance');
   const [useFullResolution, setUseFullResolution] = useState(false);
   const [zoomedJobId, setZoomedJobId] = useState<number | null>(null);
+  const [credits, setCredits] = useState<number>(getCredits());
+  const [isCreditShopOpen, setIsCreditShopOpen] = useState(false);
+  const [showInsufficientCredits, setShowInsufficientCredits] = useState(false);
+  const [requiredCredits, setRequiredCredits] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const addFilesToQueue = useCallback((files: FileList) => {
-    const newJobs: ImageJob[] = Array.from(files).map(file => ({
+    const filesArray = Array.from(files);
+    const creditsNeeded = filesArray.length * (mode === 'super-resolution' ? CREDITS_PER_SUPER_RESOLUTION : CREDITS_PER_IMAGE);
+    
+    if (!hasEnoughCredits(creditsNeeded)) {
+      setRequiredCredits(creditsNeeded);
+      setShowInsufficientCredits(true);
+      return;
+    }
+    
+    const newJobs: ImageJob[] = filesArray.map(file => ({
       id: Date.now() + Math.random(),
       file,
       status: 'queued',
@@ -132,6 +150,14 @@ export default function App() {
   }, [mode]);
 
   const addSingleFileToQueue = useCallback((file: File) => {
+    const creditsNeeded = mode === 'super-resolution' ? CREDITS_PER_SUPER_RESOLUTION : CREDITS_PER_IMAGE;
+    
+    if (!hasEnoughCredits(creditsNeeded)) {
+      setRequiredCredits(creditsNeeded);
+      setShowInsufficientCredits(true);
+      return;
+    }
+    
     const newJob: ImageJob = {
       id: Date.now() + Math.random(),
       file,
@@ -146,6 +172,14 @@ export default function App() {
 
     const processJob = async (job: ImageJob) => {
       try {
+        // Deduct credits at the start of processing
+        const creditsNeeded = job.mode === 'super-resolution' ? CREDITS_PER_SUPER_RESOLUTION : CREDITS_PER_IMAGE;
+        if (!deductCredits(creditsNeeded)) {
+          setJobs(prev => prev.map(j => j.id === job.id ? { ...j, status: 'error', error: 'Nicht genug Credits' } : j));
+          return;
+        }
+        setCredits(getCredits());
+        
         const { base64, mimeType } = await preprocessImage(job.file, useFullResolution);
         
         setJobs(prev => prev.map(j => {
@@ -201,6 +235,10 @@ export default function App() {
         console.error(`Failed to process job ${job.id}:`, err);
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
         setJobs(prev => prev.map(j => j.id === job.id ? { ...j, status: 'error', error: errorMessage } : j));
+        // Refund credits on error
+        const creditsNeeded = job.mode === 'super-resolution' ? CREDITS_PER_SUPER_RESOLUTION : CREDITS_PER_IMAGE;
+        addCredits(creditsNeeded);
+        setCredits(getCredits());
       }
     };
 
@@ -218,6 +256,16 @@ export default function App() {
   }, [jobs, customEnhancePrompt, useFullResolution]);
 
   const handleRetryJob = (jobId: number) => {
+    const job = jobs.find(j => j.id === jobId);
+    if (!job) return;
+    
+    const creditsNeeded = job.mode === 'super-resolution' ? CREDITS_PER_SUPER_RESOLUTION : CREDITS_PER_IMAGE;
+    if (!hasEnoughCredits(creditsNeeded)) {
+      setRequiredCredits(creditsNeeded);
+      setShowInsufficientCredits(true);
+      return;
+    }
+    
     setJobs(prev => prev.map(j => 
       j.id === jobId 
         ? { ...j, status: 'queued', restoredSrc: undefined, error: undefined, mode: mode, progress: undefined } 
@@ -271,6 +319,16 @@ export default function App() {
     }
   };
   
+  const handlePurchase = (pkg: CreditPackage) => {
+    // TODO: PayPal integration
+    console.log('Purchase package:', pkg);
+    alert(`PayPal-Integration folgt! Paket: ${pkg.name} - ${pkg.credits} Credits für €${pkg.price}`);
+    // For now, just add credits for testing
+    // addCredits(pkg.credits);
+    // setCredits(getCredits());
+    // setIsCreditShopOpen(false);
+  };
+  
   const zoomedJob = jobs.find(job => job.id === zoomedJobId);
 
   return (
@@ -282,6 +340,14 @@ export default function App() {
       onDrop={handleDrop}
     >
       <Header />
+      
+      {/* Credit Display - Fixed Top Right */}
+      {isApiConfigured && (
+        <div className="fixed top-4 right-4 z-40">
+          <CreditDisplay credits={credits} onClick={() => setIsCreditShopOpen(true)} />
+        </div>
+      )}
+      
       <main className="flex-grow container mx-auto px-4 py-8 w-full flex flex-col items-center">
         {!isApiConfigured ? (
           <ApiKeyMessage />
@@ -412,6 +478,29 @@ export default function App() {
           <p className="mt-4 text-2xl font-bold text-white">Fotos hierher ziehen, um sie hinzuzufügen</p>
         </div>
       )}
+      
+      {/* Credit Shop Modal */}
+      {isCreditShopOpen && (
+        <CreditShop
+          onClose={() => setIsCreditShopOpen(false)}
+          onPurchase={handlePurchase}
+          currentCredits={credits}
+        />
+      )}
+      
+      {/* Insufficient Credits Modal */}
+      {showInsufficientCredits && (
+        <InsufficientCreditsModal
+          required={requiredCredits}
+          current={credits}
+          onClose={() => setShowInsufficientCredits(false)}
+          onBuyCredits={() => {
+            setShowInsufficientCredits(false);
+            setIsCreditShopOpen(true);
+          }}
+        />
+      )}
+      
       <footer className="w-full text-center p-4 text-gray-500 text-sm">
         <p>Unterstützt von Gemini. Bilder werden verarbeitet und nicht gespeichert.</p>
       </footer>
