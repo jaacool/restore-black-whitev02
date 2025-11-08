@@ -1,45 +1,87 @@
-const STORAGE_KEY = 'user_credits';
-const WELCOME_BONUS_KEY = 'welcome_bonus_claimed';
+import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { db } from '../config/firebase';
+import { getCurrentUser } from './authService';
+
 const WELCOME_BONUS_CREDITS = 15;
 
-export const getCredits = (): number => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored) {
-    return parseInt(stored, 10);
+interface UserCredits {
+  credits: number;
+  welcomeBonusClaimed: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const getUserCreditsRef = (userId: string) => {
+  return doc(db, 'users', userId);
+};
+
+export const getCredits = async (): Promise<number> => {
+  const user = getCurrentUser();
+  if (!user) return 0;
+
+  try {
+    const userDoc = await getDoc(getUserCreditsRef(user.uid));
+    
+    if (!userDoc.exists()) {
+      // New user - create document with welcome bonus
+      const newUserData: UserCredits = {
+        credits: WELCOME_BONUS_CREDITS,
+        welcomeBonusClaimed: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      await setDoc(getUserCreditsRef(user.uid), newUserData);
+      return WELCOME_BONUS_CREDITS;
+    }
+
+    const data = userDoc.data() as UserCredits;
+    return data.credits || 0;
+  } catch (error) {
+    console.error('Error getting credits:', error);
+    return 0;
   }
-  
-  // Check if welcome bonus has been claimed
-  const bonusClaimed = localStorage.getItem(WELCOME_BONUS_KEY);
-  if (!bonusClaimed) {
-    // First time user - give welcome bonus
-    localStorage.setItem(WELCOME_BONUS_KEY, 'true');
-    localStorage.setItem(STORAGE_KEY, WELCOME_BONUS_CREDITS.toString());
-    return WELCOME_BONUS_CREDITS;
+};
+
+export const setCredits = async (credits: number): Promise<void> => {
+  const user = getCurrentUser();
+  if (!user) return;
+
+  try {
+    await updateDoc(getUserCreditsRef(user.uid), {
+      credits,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Error setting credits:', error);
   }
-  
-  return 0;
 };
 
-export const setCredits = (credits: number): void => {
-  localStorage.setItem(STORAGE_KEY, credits.toString());
+export const addCredits = async (amount: number): Promise<number> => {
+  const user = getCurrentUser();
+  if (!user) return 0;
+
+  try {
+    await updateDoc(getUserCreditsRef(user.uid), {
+      credits: increment(amount),
+      updatedAt: new Date().toISOString(),
+    });
+    return await getCredits();
+  } catch (error) {
+    console.error('Error adding credits:', error);
+    return 0;
+  }
 };
 
-export const addCredits = (amount: number): number => {
-  const current = getCredits();
-  const newTotal = current + amount;
-  setCredits(newTotal);
-  return newTotal;
-};
-
-export const deductCredits = (amount: number): boolean => {
-  const current = getCredits();
+export const deductCredits = async (amount: number): Promise<boolean> => {
+  const current = await getCredits();
   if (current >= amount) {
-    setCredits(current - amount);
+    await setCredits(current - amount);
     return true;
   }
   return false;
 };
 
-export const hasEnoughCredits = (required: number): boolean => {
-  return getCredits() >= required;
+export const hasEnoughCredits = async (required: number): Promise<boolean> => {
+  const credits = await getCredits();
+  return credits >= required;
 };

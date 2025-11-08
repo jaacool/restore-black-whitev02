@@ -1,7 +1,9 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { User } from 'firebase/auth';
 import { restorePhoto } from './services/geminiService';
 import { preprocessImage, splitImage, stitchAndBlendImages } from './utils/imageUtils';
 import { getCredits, deductCredits, addCredits, hasEnoughCredits } from './services/creditService';
+import { onAuthChange } from './services/authService';
 import { CREDITS_PER_IMAGE, CREDITS_PER_SUPER_RESOLUTION, CreditPackage } from './types/credits';
 import Header from './components/Header';
 import ImageUploader from './components/ImageUploader';
@@ -16,6 +18,8 @@ import GettingStarted from './components/GettingStarted';
 import CreditDisplay from './components/CreditDisplay';
 import CreditShop from './components/CreditShop';
 import InsufficientCreditsModal from './components/InsufficientCreditsModal';
+import LoginModal from './components/LoginModal';
+import UserMenu from './components/UserMenu';
 
 const ENHANCE_PROMPT = `You are an expert photo restoration AI. Your task is to transform this old, potentially damaged, black-and-white photograph into a vibrant, modern image that looks as if it were captured in 2025 with a professional-grade medium format camera (e.g., a Hasselblad) and scanned at an ultra-high 12K resolution.
 
@@ -124,17 +128,59 @@ export default function App() {
   const [mode, setMode] = useState<ProcessMode>('enhance');
   const [useFullResolution, setUseFullResolution] = useState(false);
   const [zoomedJobId, setZoomedJobId] = useState<number | null>(null);
-  const [credits, setCredits] = useState<number>(getCredits());
+  const [credits, setCredits] = useState<number>(0);
   const [isCreditShopOpen, setIsCreditShopOpen] = useState(false);
   const [showInsufficientCredits, setShowInsufficientCredits] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [requiredCredits, setRequiredCredits] = useState(0);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const addFilesToQueue = useCallback((files: FileList) => {
+  // Auth state listener
+  useEffect(() => {
+    const unsubscribe = onAuthChange(async (authUser) => {
+      setUser(authUser);
+      setIsLoadingAuth(false);
+      
+      if (authUser) {
+        // Load credits when user signs in
+        const userCredits = await getCredits();
+        setCredits(userCredits);
+      } else {
+        setCredits(0);
+      }
+    });
+    
+    return () => unsubscribe();
+  }, []);
+  
+  // Refresh credits periodically when user is logged in
+  useEffect(() => {
+    if (!user) return;
+    
+    const refreshCredits = async () => {
+      const userCredits = await getCredits();
+      setCredits(userCredits);
+    };
+    
+    refreshCredits();
+    const interval = setInterval(refreshCredits, 30000); // Every 30 seconds
+    
+    return () => clearInterval(interval);
+  }, [user]);
+  
+  const addFilesToQueue = useCallback(async (files: FileList) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
     const filesArray = Array.from(files);
     const creditsNeeded = filesArray.length * (mode === 'super-resolution' ? CREDITS_PER_SUPER_RESOLUTION : CREDITS_PER_IMAGE);
     
-    if (!hasEnoughCredits(creditsNeeded)) {
+    const hasCredits = await hasEnoughCredits(creditsNeeded);
+    if (!hasCredits) {
       setRequiredCredits(creditsNeeded);
       setShowInsufficientCredits(true);
       return;
@@ -147,12 +193,18 @@ export default function App() {
       mode,
     }));
     setJobs(prevJobs => [...prevJobs, ...newJobs]);
-  }, [mode]);
+  }, [mode, user]);
 
-  const addSingleFileToQueue = useCallback((file: File) => {
+  const addSingleFileToQueue = useCallback(async (file: File) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
     const creditsNeeded = mode === 'super-resolution' ? CREDITS_PER_SUPER_RESOLUTION : CREDITS_PER_IMAGE;
     
-    if (!hasEnoughCredits(creditsNeeded)) {
+    const hasCredits = await hasEnoughCredits(creditsNeeded);
+    if (!hasCredits) {
       setRequiredCredits(creditsNeeded);
       setShowInsufficientCredits(true);
       return;
@@ -165,7 +217,7 @@ export default function App() {
       mode,
     };
     setJobs(prevJobs => [...prevJobs, newJob]);
-  }, [mode]);
+  }, [mode, user]);
 
   useEffect(() => {
     if (!isApiConfigured) return;
@@ -174,11 +226,13 @@ export default function App() {
       try {
         // Deduct credits at the start of processing
         const creditsNeeded = job.mode === 'super-resolution' ? CREDITS_PER_SUPER_RESOLUTION : CREDITS_PER_IMAGE;
-        if (!deductCredits(creditsNeeded)) {
+        const deducted = await deductCredits(creditsNeeded);
+        if (!deducted) {
           setJobs(prev => prev.map(j => j.id === job.id ? { ...j, status: 'error', error: 'Nicht genug Credits' } : j));
           return;
         }
-        setCredits(getCredits());
+        const newCredits = await getCredits();
+        setCredits(newCredits);
         
         const { base64, mimeType } = await preprocessImage(job.file, useFullResolution);
         
@@ -237,8 +291,9 @@ export default function App() {
         setJobs(prev => prev.map(j => j.id === job.id ? { ...j, status: 'error', error: errorMessage } : j));
         // Refund credits on error
         const creditsNeeded = job.mode === 'super-resolution' ? CREDITS_PER_SUPER_RESOLUTION : CREDITS_PER_IMAGE;
-        addCredits(creditsNeeded);
-        setCredits(getCredits());
+        await addCredits(creditsNeeded);
+        const newCredits = await getCredits();
+        setCredits(newCredits);
       }
     };
 
@@ -255,12 +310,13 @@ export default function App() {
 
   }, [jobs, customEnhancePrompt, useFullResolution]);
 
-  const handleRetryJob = (jobId: number) => {
+  const handleRetryJob = async (jobId: number) => {
     const job = jobs.find(j => j.id === jobId);
     if (!job) return;
     
     const creditsNeeded = job.mode === 'super-resolution' ? CREDITS_PER_SUPER_RESOLUTION : CREDITS_PER_IMAGE;
-    if (!hasEnoughCredits(creditsNeeded)) {
+    const hasCredits = await hasEnoughCredits(creditsNeeded);
+    if (!hasCredits) {
       setRequiredCredits(creditsNeeded);
       setShowInsufficientCredits(true);
       return;
@@ -341,10 +397,22 @@ export default function App() {
     >
       <Header />
       
-      {/* Credit Display - Fixed Top Right */}
-      {isApiConfigured && (
-        <div className="fixed top-4 right-4 z-40">
-          <CreditDisplay credits={credits} onClick={() => setIsCreditShopOpen(true)} />
+      {/* User Menu & Credit Display - Fixed Top Right */}
+      {isApiConfigured && !isLoadingAuth && (
+        <div className="fixed top-4 right-4 z-40 flex items-center gap-3">
+          {user ? (
+            <>
+              <CreditDisplay credits={credits} onClick={() => setIsCreditShopOpen(true)} />
+              <UserMenu user={user} onSignOut={() => setUser(null)} />
+            </>
+          ) : (
+            <button
+              onClick={() => setShowLoginModal(true)}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              Anmelden
+            </button>
+          )}
         </div>
       )}
       
@@ -497,6 +565,17 @@ export default function App() {
           onBuyCredits={() => {
             setShowInsufficientCredits(false);
             setIsCreditShopOpen(true);
+          }}
+        />
+      )}
+      
+      {/* Login Modal */}
+      {showLoginModal && (
+        <LoginModal
+          onClose={() => setShowLoginModal(false)}
+          onSuccess={async () => {
+            const userCredits = await getCredits();
+            setCredits(userCredits);
           }}
         />
       )}
