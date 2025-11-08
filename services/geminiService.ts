@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Modality } from "@google/genai";
 
 let ai: GoogleGenAI | null = null;
@@ -8,9 +7,10 @@ const getAiInstance = (): GoogleGenAI => {
         return ai;
     }
     
-    const API_KEY = process.env.API_KEY;
+    // In this environment, the build process (e.g., on Vercel) replaces `process.env.VITE_API_KEY`.
+    const API_KEY = process.env.VITE_API_KEY;
     if (!API_KEY) {
-      throw new Error("API Key is not configured. Please set the API_KEY environment variable in your hosting provider.");
+      throw new Error("API Key is not configured. Please set the VITE_API_KEY environment variable in your hosting provider.");
     }
 
     ai = new GoogleGenAI({ apiKey: API_KEY });

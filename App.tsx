@@ -107,7 +107,8 @@ export interface ImageJob {
   };
 }
 
-const isApiConfigured = !!process.env.API_KEY;
+// In this environment, the build process (e.g., on Vercel) replaces `process.env.VITE_API_KEY`.
+const isApiConfigured = !!process.env.VITE_API_KEY;
 
 export default function App() {
   const [jobs, setJobs] = useState<ImageJob[]>([]);
