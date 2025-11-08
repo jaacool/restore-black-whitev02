@@ -110,9 +110,6 @@ const CreditShop: React.FC<CreditShopProps> = ({ onClose, onPurchase, currentCre
                 {/* Price */}
                 <div className="text-center mb-4">
                   <div className="text-3xl font-bold text-white">€{pkg.price.toFixed(2)}</div>
-                  <div className="text-xs text-gray-400 mt-1">
-                    €{pkg.pricePerImage.toFixed(2)} pro Bild
-                  </div>
                 </div>
 
                 {/* Savings */}

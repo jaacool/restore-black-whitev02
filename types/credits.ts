@@ -45,10 +45,10 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
     id: 'premium',
     name: 'Premium',
     credits: 1500,
-    price: 52.49,
-    pricePerImage: 0.105,
+    price: 48.49,
+    pricePerImage: 0.097,
     images: 500,
-    savings: 30,
+    savings: 35,
     badge: 'best-value',
   },
 ];
