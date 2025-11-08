@@ -60,7 +60,7 @@ const CreditShop: React.FC<CreditShopProps> = ({ onClose, onPurchase, currentCre
 
         {/* Packages Grid */}
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {CREDIT_PACKAGES.map((pkg) => (
               <div
                 key={pkg.id}
