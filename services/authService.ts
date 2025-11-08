@@ -4,9 +4,13 @@ import {
   onAuthStateChanged,
   User
 } from 'firebase/auth';
-import { auth, googleProvider } from '../config/firebase';
+import { auth, googleProvider, isFirebaseConfigured } from '../config/firebase';
 
 export const signInWithGoogle = async (): Promise<User> => {
+  if (!auth || !googleProvider || !isFirebaseConfigured) {
+    throw new Error('Firebase is not configured. Please set up Firebase environment variables.');
+  }
+  
   try {
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
@@ -17,6 +21,10 @@ export const signInWithGoogle = async (): Promise<User> => {
 };
 
 export const signOut = async (): Promise<void> => {
+  if (!auth || !isFirebaseConfigured) {
+    return;
+  }
+  
   try {
     await firebaseSignOut(auth);
   } catch (error) {
@@ -26,9 +34,18 @@ export const signOut = async (): Promise<void> => {
 };
 
 export const onAuthChange = (callback: (user: User | null) => void) => {
+  if (!auth || !isFirebaseConfigured) {
+    // Call callback with null immediately if Firebase is not configured
+    callback(null);
+    return () => {}; // Return empty unsubscribe function
+  }
+  
   return onAuthStateChanged(auth, callback);
 };
 
 export const getCurrentUser = (): User | null => {
+  if (!auth || !isFirebaseConfigured) {
+    return null;
+  }
   return auth.currentUser;
 };

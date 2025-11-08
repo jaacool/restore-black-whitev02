@@ -1,5 +1,5 @@
 import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db, isFirebaseConfigured } from '../config/firebase';
 import { getCurrentUser } from './authService';
 
 const WELCOME_BONUS_CREDITS = 15;
@@ -12,10 +12,17 @@ interface UserCredits {
 }
 
 const getUserCreditsRef = (userId: string) => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
   return doc(db, 'users', userId);
 };
 
 export const getCredits = async (): Promise<number> => {
+  if (!isFirebaseConfigured || !db) {
+    return 0;
+  }
+  
   const user = getCurrentUser();
   if (!user) return 0;
 
@@ -43,6 +50,10 @@ export const getCredits = async (): Promise<number> => {
 };
 
 export const setCredits = async (credits: number): Promise<void> => {
+  if (!isFirebaseConfigured || !db) {
+    return;
+  }
+  
   const user = getCurrentUser();
   if (!user) return;
 
@@ -57,6 +68,10 @@ export const setCredits = async (credits: number): Promise<void> => {
 };
 
 export const addCredits = async (amount: number): Promise<number> => {
+  if (!isFirebaseConfigured || !db) {
+    return 0;
+  }
+  
   const user = getCurrentUser();
   if (!user) return 0;
 
@@ -73,6 +88,10 @@ export const addCredits = async (amount: number): Promise<number> => {
 };
 
 export const deductCredits = async (amount: number): Promise<boolean> => {
+  if (!isFirebaseConfigured || !db) {
+    return false;
+  }
+  
   const current = await getCredits();
   if (current >= amount) {
     await setCredits(current - amount);
@@ -82,6 +101,10 @@ export const deductCredits = async (amount: number): Promise<boolean> => {
 };
 
 export const hasEnoughCredits = async (required: number): Promise<boolean> => {
+  if (!isFirebaseConfigured || !db) {
+    return false;
+  }
+  
   const credits = await getCredits();
   return credits >= required;
 };
