@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ImageJob } from '../App';
 import Loader from './Loader';
@@ -29,7 +30,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ job, onRetry, onRemove, onZoom })
                 return (
                     <div className="flex flex-col items-center text-center p-4">
                         <Loader />
-                        <p className="mt-4 font-semibold text-gray-300">Splitting image...</p>
+                        <p className="mt-4 font-semibold text-gray-300">Teile Bild auf...</p>
                     </div>
                 );
             case 'restoring':
@@ -37,7 +38,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ job, onRetry, onRemove, onZoom })
                     return (
                         <div className="flex flex-col items-center text-center p-4">
                             <Loader />
-                            <p className="mt-4 font-semibold text-gray-300">AI is enhancing tiles...</p>
+                            <p className="mt-4 font-semibold text-gray-300">KI verbessert Kacheln...</p>
                             <p className="text-sm text-gray-500">{`(${job.progress.processed}/${job.progress.total})`}</p>
                         </div>
                     );
@@ -45,14 +46,14 @@ const ImageCard: React.FC<ImageCardProps> = ({ job, onRetry, onRemove, onZoom })
                 return (
                     <div className="flex flex-col items-center text-center p-4">
                         <Loader />
-                        <p className="mt-4 font-semibold text-gray-300">AI is restoring...</p>
+                        <p className="mt-4 font-semibold text-gray-300">KI stellt wieder her...</p>
                     </div>
                 );
             case 'stitching':
                  return (
                     <div className="flex flex-col items-center text-center p-4">
                         <Loader />
-                        <p className="mt-4 font-semibold text-gray-300">Assembling image...</p>
+                        <p className="mt-4 font-semibold text-gray-300">Setze Bild zusammen...</p>
                     </div>
                 );
             case 'completed':
@@ -60,15 +61,16 @@ const ImageCard: React.FC<ImageCardProps> = ({ job, onRetry, onRemove, onZoom })
             case 'error':
                  return (
                      <div className="p-4 text-center text-red-400 flex flex-col items-center justify-center">
-                        <p className="font-semibold">Restoration Failed</p>
+                        <p className="font-semibold">Wiederherstellung fehlgeschlagen</p>
                         <p className="text-xs mt-1">{job.error}</p>
                      </div>
                 );
             case 'queued':
             case 'preprocessing':
                  return (
-                     <div className="p-4 text-center text-gray-500 flex flex-col items-center justify-center">
-                        <p>Waiting in queue...</p>
+                     <div className="p-4 text-center text-gray-400 flex flex-col items-center justify-center">
+                        <Loader />
+                        <p className="mt-2 text-sm">Verarbeite vor...</p>
                      </div>
                  );
             default:
@@ -81,14 +83,14 @@ const ImageCard: React.FC<ImageCardProps> = ({ job, onRetry, onRemove, onZoom })
              <button
                 onClick={() => onRemove(job.id)}
                 className="absolute top-2 right-2 text-gray-500 hover:text-white z-10 p-1 bg-gray-900/50 rounded-full transition-colors"
-                aria-label="Remove photo"
+                aria-label="Foto entfernen"
             >
                 <CloseIcon />
             </button>
             <div 
                 className={`w-full grid grid-cols-2 gap-4 ${job.status === 'completed' ? 'cursor-zoom-in' : 'cursor-default'}`}
                 onClick={() => job.status === 'completed' && onZoom(job.id)}
-                title={job.status === 'completed' ? 'Click to zoom and compare' : ''}
+                title={job.status === 'completed' ? 'Klicken zum Zoomen und Vergleichen' : ''}
             >
                 <ImagePanel title="Original">
                     {job.originalSrc ? (
@@ -96,11 +98,11 @@ const ImageCard: React.FC<ImageCardProps> = ({ job, onRetry, onRemove, onZoom })
                     ) : (
                         <div className="p-4 text-center flex flex-col items-center justify-center">
                             <Loader />
-                            <p className="mt-2 text-sm text-gray-400">Preprocessing...</p>
+                            <p className="mt-2 text-sm text-gray-400">Verarbeite vor...</p>
                         </div>
                     )}
                 </ImagePanel>
-                <ImagePanel title="Restored (2025)">
+                <ImagePanel title="Restauriert (2025)">
                      {renderStatus()}
                 </ImagePanel>
             </div>
@@ -108,11 +110,11 @@ const ImageCard: React.FC<ImageCardProps> = ({ job, onRetry, onRemove, onZoom })
                 {job.status === 'completed' && job.restoredSrc && (
                      <a
                         href={job.restoredSrc}
-                        download={`${job.file.name.split('.')[0]}-restored.png`}
+                        download={`${job.file.name.split('.')[0]}-restauriert.png`}
                         className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center gap-2 text-sm"
                     >
                         <DownloadIcon />
-                        Download
+                        Herunterladen
                     </a>
                 )}
                 {(job.status === 'error' || job.status === 'completed') && (
@@ -121,7 +123,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ job, onRetry, onRemove, onZoom })
                         className="bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center gap-2 text-sm"
                     >
                         <RetryIcon />
-                        Retry
+                        Erneut versuchen
                     </button>
                 )}
             </div>

@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import Loader from './Loader';
 
@@ -17,7 +18,7 @@ const CameraView: React.FC<CameraViewProps> = ({ onCapture, onClose }) => {
     const startCamera = async () => {
       try {
         if (!navigator.mediaDevices?.getUserMedia) {
-            throw new Error("Camera access is not supported by this browser.");
+            throw new Error("Kamerazugriff wird von diesem Browser nicht unterstützt.");
         }
         activeStream = await navigator.mediaDevices.getUserMedia({ 
             video: { facingMode: "environment" } 
@@ -38,7 +39,7 @@ const CameraView: React.FC<CameraViewProps> = ({ onCapture, onClose }) => {
             setError(null); // Clear previous error
         } catch (fallbackErr) {
             console.error("Error accessing fallback camera:", fallbackErr);
-            setError("Could not access any camera. Please check permissions.");
+            setError("Kein Kamerazugriff möglich. Bitte Berechtigungen prüfen.");
         }
       }
     };
@@ -96,17 +97,17 @@ const CameraView: React.FC<CameraViewProps> = ({ onCapture, onClose }) => {
           onClick={onClose}
           className="text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 hover:bg-white/10"
         >
-          Cancel
+          Abbrechen
         </button>
         <button
           onClick={handleCapture}
           disabled={!stream || !!error}
           className="bg-white hover:bg-gray-200 text-black font-bold p-4 rounded-full transition-all duration-300 ring-4 ring-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
-          aria-label="Capture photo"
+          aria-label="Foto aufnehmen"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8"></circle></svg>
         </button>
-        <div className="w-[84px]"></div>
+        <div className="w-[108px]"></div>
       </div>
     </div>
   );

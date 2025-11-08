@@ -107,7 +107,7 @@ export interface ImageJob {
   };
 }
 
-// In this environment, the build process (e.g., on Vercel) replaces `process.env.API_KEY`.
+// The API key is exposed via process.env.API_KEY in this environment.
 const isApiConfigured = !!process.env.API_KEY;
 
 export default function App() {
@@ -308,7 +308,7 @@ export default function App() {
                   }`}
                   aria-pressed={mode === 'enhance'}
                 >
-                  Enhance & Restore
+                  Verbessern
                 </button>
                 <button
                   onClick={() => setMode('super-resolution')}
@@ -316,9 +316,9 @@ export default function App() {
                     mode === 'super-resolution' ? 'bg-blue-600 text-white shadow-md' : 'hover:bg-gray-600/50 text-gray-300'
                   }`}
                   aria-pressed={mode === 'super-resolution'}
-                  title="Splits image for maximum detail. Best for large photos."
+                  title="Teilt das Bild für maximale Details. Am besten für große Fotos."
                 >
-                  Super Resolution
+                  Super-Auflösung
                 </button>
                 <button
                   onClick={() => setMode('colorize')}
@@ -327,11 +327,11 @@ export default function App() {
                   }`}
                   aria-pressed={mode === 'colorize'}
                 >
-                  Colorize Only
+                  Nur Kolorieren
                 </button>
               </div>
-              <label htmlFor="resolution-toggle" className="flex items-center cursor-pointer select-none group" title="Upload the original photo without resizing. Note: This may result in slower processing.">
-                <span className={`text-sm font-medium transition-colors ${!useFullResolution ? 'text-blue-400' : 'text-gray-400 group-hover:text-white'}`}>Compressed</span>
+              <label htmlFor="resolution-toggle" className="flex items-center cursor-pointer select-none group" title="Originalfoto ohne Größenänderung hochladen. Hinweis: Dies kann die Verarbeitung verlangsamen.">
+                <span className={`text-sm font-medium transition-colors ${!useFullResolution ? 'text-blue-400' : 'text-gray-400 group-hover:text-white'}`}>Komprimiert</span>
                 <div className="relative mx-4">
                     <input
                         type="checkbox"
@@ -343,7 +343,7 @@ export default function App() {
                     <div className="block bg-gray-600 w-14 h-8 rounded-full peer-checked:bg-blue-600 transition"></div>
                     <div className="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 ease-in-out peer-checked:translate-x-6"></div>
                 </div>
-                <span className={`text-sm font-medium transition-colors ${useFullResolution ? 'text-blue-400' : 'text-gray-400 group-hover:text-white'}`}>Full Resolution</span>
+                <span className={`text-sm font-medium transition-colors ${useFullResolution ? 'text-blue-400' : 'text-gray-400 group-hover:text-white'}`}>Volle Auflösung</span>
               </label>
             </div>
 
@@ -367,16 +367,16 @@ export default function App() {
                    <button
                       onClick={() => setIsPromptModalOpen(true)}
                       className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center gap-2"
-                      title="Customize prompt for 'Enhance & Restore' mode"
+                      title="Prompt für den Modus 'Verbessern' anpassen"
                     >
                       <EditIcon className="h-5 w-5" />
-                      Customize Prompt
+                      Prompt anpassen
                     </button>
                      <button
                         onClick={handleClearAll}
                         className="bg-red-700 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300"
                       >
-                        Clear All
+                        Alle löschen
                       </button>
                 </div>
 
@@ -409,11 +409,11 @@ export default function App() {
       {isDragging && isApiConfigured && (
         <div className="fixed inset-0 bg-black/70 z-50 flex flex-col items-center justify-center pointer-events-none">
           <PhotoIcon className="h-24 w-24 text-blue-400 animate-pulse" />
-          <p className="mt-4 text-2xl font-bold text-white">Drop photos anywhere to add them</p>
+          <p className="mt-4 text-2xl font-bold text-white">Fotos hierher ziehen, um sie hinzuzufügen</p>
         </div>
       )}
       <footer className="w-full text-center p-4 text-gray-500 text-sm">
-        <p>Powered by Gemini. Images are processed and not stored.</p>
+        <p>Unterstützt von Gemini. Bilder werden verarbeitet und nicht gespeichert.</p>
       </footer>
     </div>
   );

@@ -12,7 +12,7 @@ const Header: React.FC = () => {
         </h1>
       </div>
       <p className="mt-4 text-lg md:text-xl text-gray-400">
-        Breathe new life into old photos.
+        Erwecken Sie alte Fotos zu neuem Leben.
       </p>
     </header>
   );

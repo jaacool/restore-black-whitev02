@@ -7,7 +7,7 @@ const getAiInstance = (): GoogleGenAI => {
         return ai;
     }
     
-    // In this environment, the build process (e.g., on Vercel) replaces `process.env.API_KEY`.
+    // The API key is exposed via process.env.API_KEY in this environment.
     const API_KEY = process.env.API_KEY;
     if (!API_KEY) {
       throw new Error("API Key is not configured. Please set the API_KEY environment variable in your hosting provider.");

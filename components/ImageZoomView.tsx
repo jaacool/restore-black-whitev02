@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 interface ImageZoomViewProps {
@@ -20,7 +21,7 @@ const ZoomPanel: React.FC<{
       ref={containerRef}
       onClick={onClick}
       className="aspect-square w-full bg-gray-800 rounded-lg overflow-hidden border border-gray-700 cursor-zoom-out"
-      title="Click to close"
+      title="Klicken zum Schließen"
     >
       <img
         src={src}
@@ -75,7 +76,7 @@ const ImageZoomView: React.FC<ImageZoomViewProps> = ({ originalSrc, restoredSrc,
           onClick={onClose}
         />
         <ZoomPanel 
-          title="Restored (2025)" 
+          title="Restauriert (2025)" 
           src={restoredSrc} 
           transformStyle={transformStyle} 
           containerRef={restoredContainerRef}
@@ -85,7 +86,7 @@ const ImageZoomView: React.FC<ImageZoomViewProps> = ({ originalSrc, restoredSrc,
        <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white text-4xl leading-none hover:text-gray-300 z-[101]"
-          aria-label="Close zoom view"
+          aria-label="Zoom-Ansicht schließen"
         >
           &times;
         </button>
