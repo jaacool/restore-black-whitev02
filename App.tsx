@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { restorePhoto } from './services/geminiService';
 import { preprocessImage, splitImage, stitchAndBlendImages } from './utils/imageUtils';
@@ -11,6 +10,7 @@ import PromptEditor from './components/PromptEditor';
 import { PhotoIcon } from './components/icons/PhotoIcon';
 import ImageZoomView from './components/ImageZoomView';
 import ApiKeyMessage from './components/ApiKeyMessage';
+import GettingStarted from './components/GettingStarted';
 
 const ENHANCE_PROMPT = `You are an expert photo restoration AI. Your task is to transform this old, potentially damaged, black-and-white photograph into a vibrant, modern image that looks as if it were captured in 2025 with a professional-grade medium format camera (e.g., a Hasselblad) and scanned at an ultra-high 12K resolution.
 
@@ -348,11 +348,14 @@ export default function App() {
 
 
             {jobs.length === 0 && !isCameraOpen && (
-              <ImageUploader 
-                onImageUpload={(files) => addFilesToQueue(files)} 
-                onTakePhoto={() => setIsCameraOpen(true)}
-                isDragging={isDragging} 
-              />
+              <div className="w-full max-w-3xl flex flex-col items-center gap-10">
+                <GettingStarted />
+                <ImageUploader 
+                  onImageUpload={(files) => addFilesToQueue(files)} 
+                  onTakePhoto={() => setIsCameraOpen(true)}
+                  isDragging={isDragging} 
+                />
+              </div>
             )}
 
             {isCameraOpen && <CameraView onCapture={handleCapture} onClose={() => setIsCameraOpen(false)} />}

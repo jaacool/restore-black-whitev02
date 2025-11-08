@@ -10,7 +10,7 @@ const ApiKeyMessage: React.FC = () => (
     <p className="text-gray-300">
       This application requires a Gemini API key to function. Please set the 
       <code className="bg-gray-700 text-yellow-300 p-1 rounded mx-1 font-mono">API_KEY</code> 
-      environment variable in your hosting environment (e.g., Vercel project settings) and redeploy or refresh the application.
+      (note: all uppercase) environment variable in your hosting environment (e.g., Vercel project settings) and redeploy or refresh the application.
     </p>
     <a href="https://vercel.com/docs/projects/environment-variables" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
       Learn how to add environment variables on Vercel
