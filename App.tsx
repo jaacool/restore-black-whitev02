@@ -437,7 +437,7 @@ export default function App() {
               <div className="w-full p-1 bg-gray-700 rounded-lg flex">
                 <button
                   onClick={() => setMode('enhance')}
-                  className={`w-1/3 rounded-md py-2 px-2 text-sm md:text-base font-semibold transition-all duration-300 ${
+                  className={`w-1/2 rounded-md py-2 px-2 text-sm md:text-base font-semibold transition-all duration-300 ${
                     mode === 'enhance' ? 'bg-blue-600 text-white shadow-md' : 'hover:bg-gray-600/50 text-gray-300'
                   }`}
                   aria-pressed={mode === 'enhance'}
@@ -445,18 +445,8 @@ export default function App() {
                   Verbessern
                 </button>
                 <button
-                  onClick={() => setMode('super-resolution')}
-                  className={`w-1/3 rounded-md py-2 px-2 text-sm md:text-base font-semibold transition-all duration-300 ${
-                    mode === 'super-resolution' ? 'bg-blue-600 text-white shadow-md' : 'hover:bg-gray-600/50 text-gray-300'
-                  }`}
-                  aria-pressed={mode === 'super-resolution'}
-                  title="Teilt das Bild für maximale Details. Am besten für große Fotos."
-                >
-                  Super-Auflösung
-                </button>
-                <button
                   onClick={() => setMode('colorize')}
-                  className={`w-1/3 rounded-md py-2 px-2 text-sm md:text-base font-semibold transition-all duration-300 ${
+                  className={`w-1/2 rounded-md py-2 px-2 text-sm md:text-base font-semibold transition-all duration-300 ${
                     mode === 'colorize' ? 'bg-blue-600 text-white shadow-md' : 'hover:bg-gray-600/50 text-gray-300'
                   }`}
                   aria-pressed={mode === 'colorize'}
