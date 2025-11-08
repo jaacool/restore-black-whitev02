@@ -50,9 +50,8 @@ const CreditShop: React.FC<CreditShopProps> = ({ onClose, onPurchase, currentCre
               <h3 className="text-lg font-semibold text-white mb-2">So funktioniert's:</h3>
               <ul className="text-gray-300 space-y-1">
                 <li>• <strong>3 Credits</strong> = 1 Bild (Verbessern oder Kolorieren)</li>
-                <li>• <strong>6 Credits</strong> = 1 Bild (Super-Auflösung)</li>
                 <li>• Credits verfallen nie und haben kein Ablaufdatum</li>
-                <li>• Größere Pakete = mehr Ersparnis pro Bild</li>
+                <li>• Größere Pakete = mehr Ersparnis</li>
               </ul>
             </div>
           </div>
@@ -102,9 +101,6 @@ const CreditShop: React.FC<CreditShopProps> = ({ onClose, onPurchase, currentCre
                 {/* Images */}
                 <div className="text-center mb-4 text-gray-300">
                   <div className="text-lg font-semibold">≈ {pkg.images} Bilder</div>
-                  <div className="text-xs text-gray-500">
-                    (oder {Math.floor(pkg.images / 2)} Super-Auflösung)
-                  </div>
                 </div>
 
                 {/* Price */}
