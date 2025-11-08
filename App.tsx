@@ -21,38 +21,26 @@ import InsufficientCreditsModal from './components/InsufficientCreditsModal';
 import LoginModal from './components/LoginModal';
 import UserMenu from './components/UserMenu';
 
-const ENHANCE_PROMPT = `You are an expert photo restoration AI. Your task is to transform this old, potentially damaged, black-and-white photograph into a vibrant, modern image that looks as if it were captured in 2025 with a professional-grade medium format camera (e.g., a Hasselblad) and scanned at an ultra-high 12K resolution.
+const ENHANCE_PROMPT = `Transform this black-and-white photograph into a vibrant, modern image with professional quality.
 
-**The Prime Directive: Absolute Identity Preservation (NON-NEGOTIABLE)**
-This is the most important rule and overrides all other instructions. The absolute, non-negotiable priority is the 100% faithful preservation of the identity and likeness of every person in the photograph.
-- **DO NOT ALTER FACIAL FEATURES:** You are explicitly forbidden from altering, 'enhancing', 'beautifying', or 'correcting' any facial features. This includes, but is not limited to, the shape of the eyes, nose, mouth, jawline, ears, and forehead.
-- **NO GUESSING:** Do not guess, invent, or hallucinate facial details that are blurry, obscured, or not clearly visible in the original. If a detail is not present, you must not create it. The goal is to restore what is there, not to imagine what might have been.
-- **PRESERVE IDENTITY:** The final face MUST be instantly and unmistakably recognizable as the same person from the original photo. Do not change the person's age, expression, or unique characteristics (e.g., moles, scars, asymmetrical features).
-- **Any deviation from the original likeness is a complete failure of the task.**
-- **CONTENT INTEGRITY:** Do NOT add, remove, or change any people, objects, animals, or significant background elements. Preserve the original composition exactly.
+**CRITICAL RULES:**
+1. **PRESERVE IDENTITY:** Do NOT alter facial features. Keep faces exactly as they are - same eyes, nose, mouth, expression. The person must be instantly recognizable.
+2. **NO CONTENT CHANGES:** Do not add, remove, or change any people, objects, or elements.
+3. **PRESERVE DETAILS:** Keep all original textures, grain, and details. Do not over-smooth or airbrush.
 
-**Secondary Directives (Execute only after satisfying the Prime Directive):**
+**COLORIZATION:**
+- Add realistic, vibrant colors to the ENTIRE image (foreground AND background)
+- Use modern HDR color palette - rich, vivid colors that "pop"
+- Ensure cohesive lighting and natural color transitions
+- Colorize backgrounds with same vibrancy as subjects (avoid gray/sepia backgrounds)
 
-**1. Comprehensive Perspective and Geometry Correction:**
-   - **Mandatory First Step:** Analyze the photograph for any geometric distortions, including tilt, skew, and lens distortion.
-   - **Action:** Correct the perspective rigorously. Ensure all vertical lines are perfectly vertical and horizontal lines are perfectly horizontal. The entire scene must appear geometrically correct and stable, as if shot with a modern, corrected lens. Do not crop out important details unless absolutely necessary to fix the geometry.
+**ENHANCEMENT:**
+- Correct perspective and geometry if needed
+- Enhance clarity and sharpness
+- Remove dust, scratches, and damage
+- Maintain natural skin texture (avoid plastic/waxy look)
 
-**2. Pre-Colorization Analysis & Reasoning (Internal Thought Process):**
-   - **Crucial Step:** Before applying any color, perform an extensive internal analysis. Deconstruct the image into its constituent parts: main subject(s), background, foreground, small objects, clothing, furniture, environment (sky, trees, buildings, etc.).
-   - **Logical Color Deduction:** For each identified element, reason about its most probable and realistic color. Consider the historical context, the material of the object (e.g., wood, fabric, metal, skin), and the inferred lighting conditions.
-   - **Develop a Cohesive Palette:** Based on this analysis, formulate a complete and harmonious color palette for the entire scene. This palette must ensure that all colors work together under a single, consistent light source. This "thinking" phase is critical to avoid inconsistent or unrealistic color choices.
-
-**3. High Dynamic Range (HDR) Colorization and Restoration:**
-   - **Holistic Application:** Execute the colorization based on the palette developed in the previous step. You must colorize the **entire image** with the decided ultra-realistic, natural colors. This includes every detail from the deep background to the immediate foreground.
-   - **Modern HDR Look & Large Format Quality:** The final image must possess the characteristics of a modern High Dynamic Range (HDR) photograph, exhibiting rich, deep contrast. Bright areas should be detailed without being blown out, and dark areas should be rich with information, not crushed into black. The goal is to achieve the quality of a 12K large-format scan, resulting in super clear and sharp details across the entire image. The overall image should have incredible depth and clarity.
-   - **Expansive Color Gamut & Bit Depth:** The goal is to produce an image with an exceptionally wide and nuanced color palette, as if captured with a sensor capable of deep color (e.g., 14-bit or 15-bit). This means rendering millions of distinct shades, resulting in incredibly smooth gradients and subtle color variations, especially in skin tones, skies, and fabrics. Avoid color banding. The colors must 'pop' realistically, avoiding a washed-out or faded appearance.
-   - **Background Color Parity:** This is a non-negotiable directive. The background and environment MUST be colorized with the same richness, vibrancy, and realism as the main subjects. A common failure to avoid is a vibrant subject against a muted, grayish, or sepia-toned background. You must actively prevent this. The entire frame, from the most distant object to the closest, must share the same modern, vivid color palette.
-   - **Detail Enhancement & Texture Fidelity:** Restore and enhance fine details and textures across the entire photograph. A critical aspect of this is the realistic rendering of skin. **Avoid an overly smooth, 'airbrushed', 'plastic', or 'waxy' appearance.** Instead, meticulously recreate or preserve natural skin textures, including pores, fine lines, and subtle imperfections appropriate for the subject's age. The goal is lifelike skin, not digitally perfected skin. Skin tones must be rendered with natural, subtle variations. **For faces, this directive is subordinate to the Prime Directive.** Enhance texture only if it does not compromise the original likeness. For small or distant faces, allocate a disproportionate amount of processing focus to ensure they are restored with clarity and accuracy, not just blurred color.
-
-**4. Removal of Non-Photographic Elements:**
-   - **Clean Up:** After colorization, remove any elements that are not part of the original photographic scene. This includes handwritten text, timestamps, borders, dust, scratches, and stains. The final output must be a clean photograph, free of any superimposed artifacts.
-
-Final Goal: The resulting image must be indistinguishable from a high-quality photograph taken in 2025, with the absolute preservation of the original subjects' identities.`;
+Final result: A modern, high-quality photo that preserves the original subjects perfectly.`;
 
 const COLORIZE_ONLY_PROMPT = `You are an expert photo colorization AI. Your task is to add ultra-realistic, vibrant, and modern color to this black-and-white photograph, making it look as if it were captured with a high-end modern smartphone camera like an iPhone.
 
