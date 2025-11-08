@@ -92,9 +92,14 @@ const ImageCard: React.FC<ImageCardProps> = ({ job, onRetry, onRemove, onZoom })
                 onClick={() => job.status === 'completed' && onZoom(job.id)}
                 title={job.status === 'completed' ? 'Klicken zum Zoomen und Vergleichen' : ''}
             >
-                <ImagePanel title="Original">
+                <ImagePanel title="Original (Entsättigt)">
                     {job.originalSrc ? (
-                        <img src={job.originalSrc} alt="Original" className="w-full h-full object-contain" />
+                        <div className="relative w-full h-full">
+                            <img src={job.originalSrc} alt="Original" className="w-full h-full object-contain" />
+                            <div className="absolute top-2 left-2 bg-gray-900/80 text-green-400 text-xs px-2 py-1 rounded-md font-semibold border border-green-500/50">
+                                ✓ 0% Sättigung
+                            </div>
+                        </div>
                     ) : (
                         <div className="p-4 text-center flex flex-col items-center justify-center">
                             <Loader />

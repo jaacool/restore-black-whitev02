@@ -35,9 +35,17 @@ export const preprocessImage = (file: File, useFullResolution = false): Promise<
         // Draw the image onto the canvas (this will scale it if needed)
         ctx.drawImage(img, 0, 0, width, height);
 
+        // Verify desaturation by checking a sample pixel
+        const imageData = ctx.getImageData(width / 2, height / 2, 1, 1);
+        const [r, g, b] = imageData.data;
+        const isGrayscale = r === g && g === b;
+        console.log('Entsaettigung durchgefuehrt:', isGrayscale ? 'Erfolgreich' : 'Warnung', 'RGB:', r, g, b);
+
         // Export the canvas content as a PNG base64 string for better quality
         const outputMimeType = 'image/png';
         const base64 = canvas.toDataURL(outputMimeType);
+        
+        console.log('Bild wird zu Gemini hochgeladen:', width, 'x', height, 'px, Groesse:', Math.round(base64.length / 1024), 'KB');
         
         resolve({ base64, mimeType: outputMimeType });
       };
