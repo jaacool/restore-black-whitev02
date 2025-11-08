@@ -1,9 +1,8 @@
-
 import React from 'react';
 
-export const PhotoIcon: React.FC = () => (
+export const PhotoIcon: React.FC<{ className?: string }> = ({ className = "mx-auto h-12 w-12 text-gray-500" }) => (
     <svg
-        className="mx-auto h-12 w-12 text-gray-500"
+        className={className}
         stroke="currentColor"
         fill="none"
         viewBox="0 0 48 48"

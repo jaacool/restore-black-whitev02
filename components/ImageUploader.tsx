@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { PhotoIcon } from './icons/PhotoIcon';
 import { CameraIcon } from './icons/CameraIcon';
-import Loader from './Loader';
 
 interface ImageUploaderProps {
-  onImageUpload: (file: File) => void;
+  onImageUpload: (files: FileList) => void;
   onTakePhoto: () => void;
-  isLoading: boolean;
   isDragging: boolean;
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, onTakePhoto, isLoading, isDragging }) => {
+const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, onTakePhoto, isDragging }) => {
   const [isCameraSupported, setIsCameraSupported] = useState(false);
 
   useEffect(() => {
@@ -20,18 +18,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, onTakePhot
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      onImageUpload(e.target.files[0]);
+      onImageUpload(e.target.files);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="text-center p-8">
-        <Loader />
-        <p className="mt-4 text-lg text-gray-300">Initializing AI model...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full max-w-2xl text-center flex flex-col items-center gap-6">
@@ -43,7 +32,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, onTakePhot
       >
         <PhotoIcon />
         <span className="mt-2 block font-semibold text-gray-200">
-          Drop your photo here or click to browse
+          Drop your photos here or click to browse
         </span>
         <span className="block text-sm text-gray-500">Supports JPG, PNG, WEBP, etc.</span>
         <input
@@ -52,8 +41,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, onTakePhot
           type="file"
           className="sr-only"
           accept="image/*"
+          multiple
           onChange={handleFileChange}
-          disabled={isLoading}
         />
       </label>
 
@@ -65,7 +54,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, onTakePhot
       
       <button
         onClick={onTakePhoto}
-        disabled={!isCameraSupported || isLoading}
+        disabled={!isCameraSupported}
         className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
         title={!isCameraSupported ? "Camera not supported by your browser" : ""}
       >
