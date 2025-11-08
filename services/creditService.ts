@@ -1,6 +1,7 @@
 import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../config/firebase';
 import { getCurrentUser } from './authService';
+import { isAdmin, ADMIN_CREDITS } from '../config/admin';
 
 const WELCOME_BONUS_CREDITS = 15;
 
@@ -25,6 +26,11 @@ export const getCredits = async (): Promise<number> => {
   
   const user = getCurrentUser();
   if (!user) return 0;
+
+  // Admin check - return unlimited credits
+  if (isAdmin(user.email)) {
+    return ADMIN_CREDITS;
+  }
 
   try {
     const userDoc = await getDoc(getUserCreditsRef(user.uid));
@@ -92,6 +98,13 @@ export const deductCredits = async (amount: number): Promise<boolean> => {
     return false;
   }
   
+  const user = getCurrentUser();
+  
+  // Admin check - never deduct credits for admins
+  if (user && isAdmin(user.email)) {
+    return true; // Always return true, no deduction
+  }
+  
   const current = await getCredits();
   if (current >= amount) {
     await setCredits(current - amount);
@@ -103,6 +116,13 @@ export const deductCredits = async (amount: number): Promise<boolean> => {
 export const hasEnoughCredits = async (required: number): Promise<boolean> => {
   if (!isFirebaseConfigured || !db) {
     return false;
+  }
+  
+  const user = getCurrentUser();
+  
+  // Admin check - always has enough credits
+  if (user && isAdmin(user.email)) {
+    return true;
   }
   
   const credits = await getCredits();

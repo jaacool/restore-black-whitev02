@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { signOut } from '../services/authService';
+import { isAdmin } from '../config/admin';
 
 interface UserMenuProps {
   user: User;
@@ -59,6 +60,12 @@ const UserMenu: React.FC<UserMenuProps> = ({ user, onSignOut }) => {
           <div className="px-4 py-3 border-b border-gray-700">
             <p className="text-sm text-gray-400">Angemeldet als</p>
             <p className="text-sm font-semibold text-white truncate">{user.email}</p>
+            {isAdmin(user.email) && (
+              <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded text-xs font-bold text-white">
+                <span>👑</span>
+                <span>ADMIN</span>
+              </div>
+            )}
           </div>
           
           <button
