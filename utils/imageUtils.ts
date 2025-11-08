@@ -29,17 +29,33 @@ export const preprocessImage = (file: File, useFullResolution = false): Promise<
         canvas.width = width;
         canvas.height = height;
 
-        // Apply grayscale filter to remove any color cast (like sepia)
-        ctx.filter = 'grayscale(100%)';
-        
-        // Draw the image onto the canvas (this will scale it if needed)
+        // Draw the image onto the canvas first (this will scale it if needed)
         ctx.drawImage(img, 0, 0, width, height);
 
+        // Apply grayscale conversion by manipulating pixels directly
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          // Calculate grayscale using luminosity method
+          const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+          data[i] = gray;     // R
+          data[i + 1] = gray; // G
+          data[i + 2] = gray; // B
+          // Alpha channel (i + 3) remains unchanged
+        }
+        
+        // Put the grayscale image data back
+        ctx.putImageData(imageData, 0, 0);
+
         // Verify desaturation by checking a sample pixel
-        const imageData = ctx.getImageData(width / 2, height / 2, 1, 1);
-        const [r, g, b] = imageData.data;
+        const sampleData = ctx.getImageData(width / 2, height / 2, 1, 1);
+        const [r, g, b] = sampleData.data;
         const isGrayscale = r === g && g === b;
-        console.log('Entsaettigung durchgefuehrt:', isGrayscale ? 'Erfolgreich' : 'Warnung', 'RGB:', r, g, b);
+        console.log('Entsaettigung durchgefuehrt:', isGrayscale ? 'Erfolgreich ✓' : 'Fehler ✗', 'RGB:', r, g, b);
 
         // Export the canvas content as a PNG base64 string for better quality
         const outputMimeType = 'image/png';
